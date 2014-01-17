@@ -298,7 +298,20 @@ func main() {
 				panic(err)
 			}
 
-			serverAddrChan <- strings.Replace(listener.Addr().String(), loopbackHost, hostName, 1)
+			ips, err := net.LookupIP(hostName)
+			if err != nil {
+				panic(err)
+			}
+
+			var ip string
+
+			for _, v := range ips {
+				if strings.Contains(listener.Addr().String(), v.String()) {
+					ip = v.String()
+				}
+			}
+
+			serverAddrChan <- strings.Replace(listener.Addr().String(), ip, hostName, 1)
 
 			http.Serve(listener, nil)
 		}
